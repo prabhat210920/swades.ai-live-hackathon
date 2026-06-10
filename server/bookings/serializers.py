@@ -42,6 +42,54 @@ class PhoneTokenObtainSerializer(serializers.Serializer):
 
 
 # ---------------------------------------------------------------------------
+# Registration serializer
+# ---------------------------------------------------------------------------
+
+class RegisterSerializer(serializers.Serializer):
+    """
+    Registers a new user with a phone number and password.
+    Returns JWT tokens immediately so the user is logged in after signup.
+    """
+    phone_number = serializers.CharField(
+        max_length=20,
+        help_text="Unique phone number used as the login identifier (e.g. +919876543210).",
+    )
+    password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        style={"input_type": "password"},
+        help_text="Password (minimum 8 characters).",
+    )
+    password_confirm = serializers.CharField(
+        write_only=True,
+        style={"input_type": "password"},
+        help_text="Repeat the password to confirm.",
+    )
+
+    def validate_phone_number(self, value):
+        if CustomUser.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError(
+                "A user with this phone number already exists."
+            )
+        return value
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["password_confirm"]:
+            raise serializers.ValidationError(
+                {"password_confirm": "Passwords do not match."}
+            )
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop("password_confirm")
+        return CustomUser.objects.create_user(
+            phone_number=validated_data["phone_number"],
+            password=validated_data["password"],
+        )
+
+
+
+# ---------------------------------------------------------------------------
 # Venue serializer
 # ---------------------------------------------------------------------------
 

@@ -17,6 +17,7 @@ from .models import Booking, Slot, Venue
 from .serializers import (
     BookingSerializer,
     PhoneTokenObtainSerializer,
+    RegisterSerializer,
     SlotSerializer,
     VenueSerializer,
 )
@@ -119,6 +120,92 @@ class LoginView(APIView):
                 },
             },
             status=status.HTTP_200_OK,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Register view — POST /auth/register/
+# ---------------------------------------------------------------------------
+
+@extend_schema(tags=["Auth"])
+class RegisterView(APIView):
+    """
+    Create a new user account using a phone number and password.
+    Returns JWT tokens immediately — no separate login step needed.
+    """
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        summary="Register a new user",
+        description=(
+            "Creates a new user account with a **phone number** and **password**. "
+            "On success, returns JWT `access` and `refresh` tokens so the user "
+            "is instantly authenticated — no separate login call required.\n\n"
+            "**Validation rules:**\n"
+            "- `phone_number` must be unique.\n"
+            "- `password` must be at least 8 characters.\n"
+            "- `password` and `password_confirm` must match."
+        ),
+        request=RegisterSerializer,
+        responses={
+            201: OpenApiResponse(
+                response=LoginResponseSerializer,
+                description="Account created — returns JWT tokens.",
+            ),
+            400: OpenApiResponse(
+                response=ErrorDetailSerializer,
+                description="Validation error (duplicate phone, password mismatch, etc.).",
+                examples=[
+                    OpenApiExample(
+                        "Phone already exists",
+                        value={"phone_number": ["A user with this phone number already exists."]},
+                    ),
+                    OpenApiExample(
+                        "Password mismatch",
+                        value={"password_confirm": ["Passwords do not match."]},
+                    ),
+                ],
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Register request",
+                value={
+                    "phone_number": "+919876543210",
+                    "password": "strongpass1",
+                    "password_confirm": "strongpass1",
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Successful response",
+                value={
+                    "access": "<JWT_ACCESS_TOKEN>",
+                    "refresh": "<JWT_REFRESH_TOKEN>",
+                    "user": {"id": 1, "phone_number": "+919876543210"},
+                },
+                response_only=True,
+                status_codes=["201"],
+            ),
+        ],
+        auth=[],
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": {
+                    "id": user.pk,
+                    "phone_number": user.phone_number,
+                },
+            },
+            status=status.HTTP_201_CREATED,
         )
 
 

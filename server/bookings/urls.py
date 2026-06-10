@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .views import BookingViewSet, LoginView, VenueViewSet
+from .views import BookingViewSet, LoginView, RegisterView, VenueViewSet
 
 # ---------------------------------------------------------------------------
 # Router
@@ -18,8 +18,10 @@ router.register(r"bookings", BookingViewSet, basename="booking")
 
 urlpatterns = [
     # --- Authentication ---
+    # POST  /auth/register/       → create account → JWT tokens
     # POST  /auth/login/          → phone_number + password → JWT tokens
     # POST  /auth/token/refresh/  → refresh token → new access token
+    path("auth/register/", RegisterView.as_view(), name="auth-register"),
     path("auth/login/", LoginView.as_view(), name="auth-login"),
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
 
