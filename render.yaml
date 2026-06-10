@@ -1,0 +1,44 @@
+# render.yaml — must live at the REPO ROOT for Blueprint to work
+# Render reads this file to auto-configure web service + database.
+# Docs: https://render.com/docs/infrastructure-as-code
+
+services:
+  - type: web
+    name: quickslot-api
+    runtime: python
+    region: singapore           # change to: oregon, frankfurt, ohio, virginia
+    plan: free
+
+    # rootDir tells Render to treat server/ as the working directory
+    # for all build/start commands and file lookups
+    rootDir: server
+
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+
+      - key: DEBUG
+        value: "False"
+
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost,127.0.0.1"
+
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quickslot-db
+          property: connectionString
+
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+
+    healthCheckPath: /api/schema/
+
+databases:
+  - name: quickslot-db
+    databaseName: quickslot
+    user: quickslot_user
+    region: singapore
+    plan: free
