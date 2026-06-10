@@ -1,16 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../repo/auth_repo.dart';
+import '../core/utils/error_handler.dart';
+import 'auth_controller.dart';
+
 class LoginState {
   final String phone;
   final String password;
   final bool obscurePassword;
   final bool isLoading;
+  final String? errorMessage;
 
-  LoginState({
+  const LoginState({
     this.phone = '',
     this.password = '',
     this.obscurePassword = true,
     this.isLoading = false,
+    this.errorMessage,
   });
 
   LoginState copyWith({
@@ -18,48 +24,68 @@ class LoginState {
     String? password,
     bool? obscurePassword,
     bool? isLoading,
+    String? errorMessage,
+    bool clearError = false,
   }) {
     return LoginState(
       phone: phone ?? this.phone,
       password: password ?? this.password,
       obscurePassword: obscurePassword ?? this.obscurePassword,
       isLoading: isLoading ?? this.isLoading,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 }
 
 class LoginController extends AutoDisposeNotifier<LoginState> {
   @override
-  LoginState build() {
-    return LoginState();
-  }
+  LoginState build() => const LoginState();
 
-  void updatePhone(String value) {
-    state = state.copyWith(phone: value);
-  }
+  AuthRepo get _repo => ref.read(authRepoProvider);
 
-  void updatePassword(String value) {
-    state = state.copyWith(password: value);
-  }
+  void updatePhone(String value) =>
+      state = state.copyWith(phone: value, clearError: true);
 
-  void togglePasswordVisibility() {
-    state = state.copyWith(obscurePassword: !state.obscurePassword);
-  }
+  void updatePassword(String value) =>
+      state = state.copyWith(password: value, clearError: true);
 
-  Future<void> login() async {
-    // TODO: Integrate actual authentication logic here
-    state = state.copyWith(isLoading: true);
+  void togglePasswordVisibility() =>
+      state = state.copyWith(obscurePassword: !state.obscurePassword);
 
-    // Simulating network delay
-    await Future.delayed(const Duration(seconds: 2));
+  /// Returns true on success so the UI can navigate.
+  Future<bool> login() async {
+    if (state.phone.trim().isEmpty || state.password.isEmpty) {
+      state = state.copyWith(
+        errorMessage: 'Please enter your phone number and password.',
+      );
+      return false;
+    }
 
-    print('Logging in with Phone: ${state.phone}');
-
-    state = state.copyWith(isLoading: false);
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final auth = await _repo.login(
+        phoneNumber: state.phone.trim(),
+        password: state.password,
+      );
+      ref.read(authControllerProvider.notifier).markLoggedIn(
+        phone: auth.user.phoneNumber,
+        userId: auth.user.id,
+      );
+      return true;
+    } on AppException catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Network error. Please try again.',
+      );
+      return false;
+    }
   }
 }
 
 final loginControllerProvider =
-    NotifierProvider.autoDispose<LoginController, LoginState>(
-      () => LoginController(),
+    AutoDisposeNotifierProvider<LoginController, LoginState>(
+      LoginController.new,
     );
