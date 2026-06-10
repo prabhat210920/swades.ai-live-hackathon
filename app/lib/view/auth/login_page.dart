@@ -2,9 +2,9 @@ import 'package:QuickSlot/core/constants/assets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controller/login_controller.dart';
-import '../../core/theme/app_theme.dart';
-import 'widgets/login_form_card.dart';
+import '../../../controller/login_controller.dart';
+import '../../../core/theme/app_theme.dart';
+import '../widgets/login_form_card.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});

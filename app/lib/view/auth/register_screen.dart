@@ -2,9 +2,9 @@ import 'package:QuickSlot/core/constants/assets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../controller/register_controller.dart';
-import '../core/theme/app_theme.dart';
-import 'widgets/registration_card.dart';
+import '../../controller/register_controller.dart';
+import '../../core/theme/app_theme.dart';
+import '../widgets/registration_card.dart';
 
 class RegisterScreen extends ConsumerWidget {
   const RegisterScreen({super.key});

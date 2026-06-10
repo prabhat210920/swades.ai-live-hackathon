@@ -217,44 +217,169 @@ class RegisterView(APIView):
     list=extend_schema(
         tags=["Venues"],
         summary="List all venues",
-        description="Returns a paginated list of all venues. **No authentication required.**",
+        description=(
+            "Returns a list of all venues. **No authentication required.**\n\n"
+            "Each venue includes:\n"
+            "- `image_url` — public photo URL\n"
+            "- `sports` — list of sports offered (e.g. `[\"Badminton\", \"Squash\"]`)\n"
+            "- `price_per_hour` — cost in INR per one-hour slot"
+        ),
         responses={200: VenueSerializer(many=True)},
+        examples=[
+            OpenApiExample(
+                "Venue list item",
+                value={
+                    "id": 1,
+                    "name": "Koramangala Sports Arena",
+                    "address": "80 Feet Road, Koramangala 4th Block",
+                    "city": "Bengaluru",
+                    "description": "Premium indoor sports complex with 6 badminton courts.",
+                    "image_url": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800",
+                    "sports": ["Badminton", "Squash", "Table Tennis"],
+                    "price_per_hour": "800.00",
+                    "created_at": "2026-06-10T12:00:00Z",
+                    "updated_at": "2026-06-10T12:00:00Z",
+                },
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
         auth=[],
     ),
     retrieve=extend_schema(
         tags=["Venues"],
         summary="Get a single venue",
-        description="Returns detailed information for a single venue by ID.",
+        description="Returns full details for a single venue by ID, including image, sports, and pricing.",
         responses={
             200: VenueSerializer,
             404: OpenApiResponse(description="Venue not found."),
         },
+        examples=[
+            OpenApiExample(
+                "Venue detail",
+                value={
+                    "id": 1,
+                    "name": "Koramangala Sports Arena",
+                    "address": "80 Feet Road, Koramangala 4th Block",
+                    "city": "Bengaluru",
+                    "description": "Premium indoor sports complex.",
+                    "image_url": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800",
+                    "sports": ["Badminton", "Squash", "Table Tennis"],
+                    "price_per_hour": "800.00",
+                    "created_at": "2026-06-10T12:00:00Z",
+                    "updated_at": "2026-06-10T12:00:00Z",
+                },
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
         auth=[],
     ),
     create=extend_schema(
         tags=["Venues"],
         summary="Create a venue",
-        description="Creates a new venue. **Requires JWT authentication.**",
+        description=(
+            "Creates a new venue. **Requires JWT authentication.**\n\n"
+            "**Fields:**\n"
+            "- `name` *(required)* — venue name\n"
+            "- `address` *(required)* — full street address\n"
+            "- `city` *(required)* — city name\n"
+            "- `description` *(optional)* — longer description\n"
+            "- `image_url` *(optional)* — public URL to a venue photo\n"
+            "- `sports` *(optional)* — JSON list of sports, e.g. `[\"Badminton\", \"Squash\"]`\n"
+            "- `price_per_hour` *(optional)* — price in INR per hour slot (default `0.00`)"
+        ),
         responses={
             201: VenueSerializer,
             400: OpenApiResponse(description="Validation error."),
             401: OpenApiResponse(description="Authentication credentials were not provided."),
         },
+        examples=[
+            OpenApiExample(
+                "Create venue request",
+                value={
+                    "name": "Koramangala Sports Arena",
+                    "address": "80 Feet Road, Koramangala 4th Block",
+                    "city": "Bengaluru",
+                    "description": "Premium indoor sports complex.",
+                    "image_url": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800",
+                    "sports": ["Badminton", "Squash", "Table Tennis"],
+                    "price_per_hour": "800.00",
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Created venue response",
+                value={
+                    "id": 1,
+                    "name": "Koramangala Sports Arena",
+                    "address": "80 Feet Road, Koramangala 4th Block",
+                    "city": "Bengaluru",
+                    "description": "Premium indoor sports complex.",
+                    "image_url": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800",
+                    "sports": ["Badminton", "Squash", "Table Tennis"],
+                    "price_per_hour": "800.00",
+                    "created_at": "2026-06-10T12:00:00Z",
+                    "updated_at": "2026-06-10T12:00:00Z",
+                },
+                response_only=True,
+                status_codes=["201"],
+            ),
+        ],
     ),
     update=extend_schema(
         tags=["Venues"],
         summary="Update a venue (full)",
-        description="Fully replaces an existing venue. **Requires JWT authentication.**",
+        description=(
+            "Fully replaces an existing venue. All fields must be supplied. **Requires JWT authentication.**\n\n"
+            "Updatable fields: `name`, `address`, `city`, `description`, `image_url`, `sports`, `price_per_hour`."
+        ),
+        examples=[
+            OpenApiExample(
+                "Full update request",
+                value={
+                    "name": "Koramangala Sports Arena",
+                    "address": "80 Feet Road, Koramangala 4th Block",
+                    "city": "Bengaluru",
+                    "description": "Updated description.",
+                    "image_url": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800",
+                    "sports": ["Badminton", "Squash"],
+                    "price_per_hour": "900.00",
+                },
+                request_only=True,
+            ),
+        ],
     ),
     partial_update=extend_schema(
         tags=["Venues"],
         summary="Update a venue (partial)",
-        description="Partially updates an existing venue. **Requires JWT authentication.**",
+        description=(
+            "Partially updates an existing venue — send only the fields you want to change. "
+            "**Requires JWT authentication.**\n\n"
+            "Examples: change only `price_per_hour`, or add a sport to `sports`."
+        ),
+        examples=[
+            OpenApiExample(
+                "Update price only",
+                value={"price_per_hour": "950.00"},
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Update image URL",
+                value={"image_url": "https://example.com/new-photo.jpg"},
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Update sports list",
+                value={"sports": ["Badminton", "Squash", "Table Tennis"]},
+                request_only=True,
+            ),
+        ],
     ),
     destroy=extend_schema(
         tags=["Venues"],
         summary="Delete a venue",
-        description="Deletes a venue by ID. **Requires JWT authentication.**",
+        description="Deletes a venue by ID. **Requires JWT authentication.** Cascades to all slots and bookings.",
         responses={
             204: OpenApiResponse(description="Venue deleted successfully."),
             404: OpenApiResponse(description="Venue not found."),

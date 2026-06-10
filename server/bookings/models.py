@@ -65,6 +65,13 @@ class Venue(models.Model):
         blank=True,
         help_text="List of sports available at this venue, e.g. ['Badminton', 'Squash'].",
     )
+    # Booking cost in INR per one-hour slot
+    price_per_hour = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=0.00,
+        help_text="Price in INR charged per one-hour slot.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

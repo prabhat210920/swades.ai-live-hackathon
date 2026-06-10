@@ -26,6 +26,7 @@ VENUES = [
         "description": "Premium indoor sports complex with 6 badminton courts and 2 squash courts.",
         "image_url": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800",
         "sports": ["Badminton", "Squash", "Table Tennis"],
+        "price_per_hour": "800.00",
     },
     {
         "name": "Indiranagar Cricket Ground",
@@ -34,6 +35,7 @@ VENUES = [
         "description": "Open-air cricket ground with a turf pitch and practice nets.",
         "image_url": "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800",
         "sports": ["Cricket"],
+        "price_per_hour": "1200.00",
     },
     {
         "name": "HSR Futsal Club",
@@ -42,6 +44,7 @@ VENUES = [
         "description": "5-a-side and 7-a-side football turf, floodlit for night matches.",
         "image_url": "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800",
         "sports": ["Football", "Futsal"],
+        "price_per_hour": "1000.00",
     },
     {
         "name": "Powai Aquatic Centre",
@@ -50,6 +53,7 @@ VENUES = [
         "description": "Olympic-size swimming pool with separate learner's pool and spa.",
         "image_url": "https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?w=800",
         "sports": ["Swimming"],
+        "price_per_hour": "600.00",
     },
     {
         "name": "Bandra Tennis Academy",
@@ -58,6 +62,7 @@ VENUES = [
         "description": "4 clay courts and 2 hard courts with on-site coaching available.",
         "image_url": "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800",
         "sports": ["Tennis"],
+        "price_per_hour": "1500.00",
     },
 ]
 
@@ -158,6 +163,7 @@ class Command(BaseCommand):
                     "description": v["description"],
                     "image_url": v.get("image_url", ""),
                     "sports": v.get("sports", []),
+                    "price_per_hour": v.get("price_per_hour", "0.00"),
                 },
             )
             venue_objects.append(venue)

@@ -104,6 +104,7 @@ class VenueSerializer(serializers.ModelSerializer):
             "description",
             "image_url",
             "sports",
+            "price_per_hour",
             "created_at",
             "updated_at",
         ]
