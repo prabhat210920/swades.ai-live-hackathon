@@ -1,0 +1,84 @@
+####################################
+# Flutter
+####################################
+
+app/.dart_tool/
+app/.packages
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.pub-cache/
+app/.pub/
+app/build/
+app/.idea/
+app/.vscode/
+app/ios/Pods/
+app/ios/.symlinks/
+app/macos/Pods/
+app/linux/flutter/ephemeral/
+app/windows/flutter/ephemeral/
+app/android/.gradle/
+app/android/app/debug
+app/android/app/profile
+app/android/app/release
+
+####################################
+# Django / Python
+####################################
+
+server/__pycache__/
+server/*.py[cod]
+server/*$py.class
+
+server/venv/
+server/env/
+server/.venv/
+
+server/db.sqlite3
+
+server/staticfiles/
+server/media/
+
+####################################
+# Environment Variables
+####################################
+
+.env
+.env.*
+server/.env
+app/.env
+
+####################################
+# IDE Files
+####################################
+
+.idea/
+.vscode/
+*.iml
+
+####################################
+# OS Files
+####################################
+
+.DS_Store
+Thumbs.db
+
+####################################
+# Logs
+####################################
+
+*.log
+
+####################################
+# Coverage
+####################################
+
+.coverage
+htmlcov/
+coverage/
+
+####################################
+# Misc
+####################################
+
+*.swp
+*.swo
