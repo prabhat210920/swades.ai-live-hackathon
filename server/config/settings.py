@@ -8,8 +8,30 @@ Use python-decouple to read from .env or OS environment.
 from datetime import timedelta
 from pathlib import Path
 
-import dj_database_url
-from decouple import Csv, config
+try:
+    import dj_database_url
+    HAS_DJ_DATABASE_URL = True
+except ImportError:
+    HAS_DJ_DATABASE_URL = False
+
+try:
+    from decouple import Csv, config
+    HAS_DECOUPLE = True
+except ImportError:
+    HAS_DECOUPLE = False
+    # Minimal shim so the rest of settings.py works without python-decouple
+    import os
+    def config(key, default=None, cast=None):
+        val = os.environ.get(key, default)
+        if cast is not None and val is not None:
+            try:
+                return cast(val)
+            except Exception:
+                return default
+        return val
+    def Csv():
+        return lambda v: [s.strip() for s in v.split(",") if s.strip()]
+
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -41,6 +63,18 @@ ALLOWED_HOSTS = config(
 # Application definition
 # ---------------------------------------------------------------------------
 
+try:
+    import corsheaders  # noqa: F401
+    HAS_CORS = True
+except ImportError:
+    HAS_CORS = False
+
+try:
+    import whitenoise  # noqa: F401
+    HAS_WHITENOISE = True
+except ImportError:
+    HAS_WHITENOISE = False
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -52,24 +86,25 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_spectacular",
-    "corsheaders",           # ← CORS
     # Project
     "bookings",
-]
+] + (["corsheaders"] if HAS_CORS else [])
 
-MIDDLEWARE = [
-    # CorsMiddleware MUST come before CommonMiddleware
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.security.SecurityMiddleware",
-    # WhiteNoise serves static files efficiently in production
-    "whitenoise.middleware.WhiteNoiseMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-]
+MIDDLEWARE = (
+    (["corsheaders.middleware.CorsMiddleware"] if HAS_CORS else [])
+    + [
+        "django.middleware.security.SecurityMiddleware",
+    ]
+    + (["whitenoise.middleware.WhiteNoiseMiddleware"] if HAS_WHITENOISE else [])
+    + [
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    ]
+)
 
 ROOT_URLCONF = "config.urls"
 
@@ -98,10 +133,17 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Falls back to SQLite for local development.
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,        # keep connections alive for 10 min (production)
-        conn_health_checks=True,
+    "default": (
+        dj_database_url.config(
+            default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+        if HAS_DJ_DATABASE_URL
+        else {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     )
 }
 

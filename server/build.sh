@@ -12,3 +12,6 @@ python manage.py collectstatic --no-input
 
 # Run database migrations
 python manage.py migrate
+
+# Seed initial data (safe to run multiple times — uses get_or_create)
+python manage.py seed
