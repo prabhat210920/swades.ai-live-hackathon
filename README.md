@@ -1,7 +1,7 @@
 # QuickSlot 🏟️
 **A Premium Sports Venue Booking Platform**
 
-[![Download APK](https://img.shields.io/badge/Download-APK-green.svg?style=for-the-badge&logo=android)]
+[![Download APK](https://img.shields.io/badge/Download-APK-green.svg?style=for-the-badge&logo=android)](https://drive.google.com/uc?export=download&id=1uEaSJyZM_vqyM4MEnwzdu_lbJQBb2y_m)
 
 > ⏱️ **Hackathon Timeline & Polish:** 
 > The core, fully functional application (both frontend and backend) was successfully built and submitted within the strict **original 3-hour deadline**. When the organizers generously provided an optional 3-hour extension, I utilized that extra time exclusively for **codebase refinement and UI/UX polish**. I refactored large screens into a highly modular atomic widget architecture, optimized Riverpod state management, and smoothed out the micro-interactions—proving my dedication not just to making it work, but making it *beautiful and maintainable*.
