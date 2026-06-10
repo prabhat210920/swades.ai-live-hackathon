@@ -51,12 +51,9 @@ SECRET_KEY = config(
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-# Render sets the service URL automatically; allow it plus localhost for dev
-ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS",
-    default="localhost,127.0.0.1",
-    cast=Csv(),
-)
+# Allow all hosts — safe for a hackathon, lock this down in production
+ALLOWED_HOSTS = ["*"]
+
 
 
 # ---------------------------------------------------------------------------
