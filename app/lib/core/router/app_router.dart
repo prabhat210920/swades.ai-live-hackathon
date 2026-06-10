@@ -3,8 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../controller/auth_controller.dart';
+import '../../model/booking_model.dart';
+import '../../view/booking_success_screen.dart';
+import '../../view/home_screen.dart';
+import '../../view/login_page.dart';
+import '../../view/my_bookings_screen.dart';
+import '../../view/profile_screen.dart';
+import '../../view/register_screen.dart';
+import '../../view/splash_screen.dart';
+import '../../view/venue_detail_screen.dart';
 
-// Route names
+// Route paths
 class AppRoutes {
   static const splash = '/';
   static const login = '/login';
@@ -13,6 +22,7 @@ class AppRoutes {
   static const venueDetail = '/venues/:id';
   static const bookings = '/bookings';
   static const profile = '/profile';
+  static const bookingSuccess = '/booking-success';
 
   static String venueDetailPath(int id) => '/venues/$id';
 }
@@ -20,7 +30,6 @@ class AppRoutes {
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // Listen to auth state to trigger router refresh
   final authNotifier = _AuthNotifier(ref);
 
   return GoRouter(
@@ -29,24 +38,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
+      final location = state.matchedLocation;
 
-      // While checking token, stay on splash
+      // ── 1. Still checking stored token → stay on splash ──────────────
       if (authState.isLoading) {
-        return state.matchedLocation == AppRoutes.splash
-            ? null
-            : AppRoutes.splash;
+        return location == AppRoutes.splash ? null : AppRoutes.splash;
       }
 
-      final isOnAuthPage = state.matchedLocation == AppRoutes.login ||
-          state.matchedLocation == AppRoutes.register ||
-          state.matchedLocation == AppRoutes.splash;
+      // ── 2. Splash is done loading → decide where to go ───────────────
+      if (location == AppRoutes.splash) {
+        return authState.isLoggedIn ? AppRoutes.home : AppRoutes.login;
+      }
 
-      // Not logged in → send to login
+      final isOnAuthPage =
+          location == AppRoutes.login || location == AppRoutes.register;
+
+      // ── 3. Not logged in on a protected route → go to login ──────────
       if (!authState.isLoggedIn && !isOnAuthPage) {
         return AppRoutes.login;
       }
 
-      // Logged in → don't show splash/login/register
+      // ── 4. Logged in but on login/register → go to home ──────────────
       if (authState.isLoggedIn && isOnAuthPage) {
         return AppRoutes.home;
       }
@@ -85,12 +97,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.profile,
         builder: (context, state) => const ProfileScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.bookingSuccess,
+        builder: (context, state) {
+          final booking = state.extra as Booking;
+          return BookingSuccessScreen(booking: booking);
+        },
+      ),
     ],
   );
 });
 
-/// A [ChangeNotifier] that listens to [AuthController] changes
-/// so go_router's [refreshListenable] can rebuild routes.
+/// Listens to [AuthController] and notifies GoRouter's refreshListenable
+/// so the redirect guard re-runs whenever auth state changes.
 class _AuthNotifier extends ChangeNotifier {
   _AuthNotifier(this._ref) {
     _ref.listen<AuthState>(authControllerProvider, (_, __) {

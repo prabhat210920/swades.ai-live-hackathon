@@ -2,22 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../controller/login_controller.dart';
+import '../controller/register_controller.dart';
 import '../core/router/app_router.dart';
 import '../core/theme/app_theme.dart';
 
-class LoginScreen extends ConsumerWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends ConsumerWidget {
+  const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(loginControllerProvider);
-    final controller = ref.read(loginControllerProvider.notifier);
+    final state = ref.watch(registerControllerProvider);
+    final controller = ref.read(registerControllerProvider.notifier);
 
-    // Show error SnackBar on login failure
-    ref.listen<LoginState>(loginControllerProvider, (prev, next) {
+    // Show error SnackBar when there's a non-field error
+    ref.listen<RegisterState>(registerControllerProvider, (prev, next) {
       if (next.errorMessage != null &&
-          next.errorMessage != prev?.errorMessage) {
+          next.errorMessage != prev?.errorMessage &&
+          (next.fieldErrors == null || next.fieldErrors!.isEmpty)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
@@ -42,11 +43,11 @@ class LoginScreen extends ConsumerWidget {
             ),
             child: Column(
               children: [
-                // Top Logo
+                // Header
                 _buildHeader(),
                 const SizedBox(height: 32),
 
-                // Main Card
+                // Card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24.0),
@@ -62,54 +63,47 @@ class LoginScreen extends ConsumerWidget {
                     ],
                   ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Sports illustration placeholder
-                      Container(
-                        height: 150,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryContainer,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.sports_soccer_rounded,
-                            size: 64,
-                            color: AppColors.primary,
+                      const Center(
+                        child: Text(
+                          'Create Account',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-
-                      const Text(
-                        'Welcome Back',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                      const SizedBox(height: 6),
+                      const Center(
+                        child: Text(
+                          'Join QuickSlot to book your first slot',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Ready for your next game?',
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
-                      ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 28),
 
-                      // Phone Input
+                      // Phone
                       _buildTextField(
-                        hintText: 'Phone Number',
+                        hintText: 'Phone Number (e.g. +919999999999)',
                         icon: Icons.phone_outlined,
                         onChanged: controller.updatePhone,
                         keyboardType: TextInputType.phone,
+                        errorText: state.fieldErrors?['phone_number'],
                       ),
                       const SizedBox(height: 16),
 
-                      // Password Input
+                      // Password
                       _buildTextField(
                         hintText: 'Password',
                         icon: Icons.lock_outline,
                         obscureText: state.obscurePassword,
                         onChanged: controller.updatePassword,
+                        errorText: state.fieldErrors?['password'],
                         suffixIcon: IconButton(
                           icon: Icon(
                             state.obscurePassword
@@ -117,19 +111,43 @@ class LoginScreen extends ConsumerWidget {
                                 : Icons.visibility_outlined,
                             color: Colors.black54,
                           ),
-                          onPressed: controller.togglePasswordVisibility,
+                          onPressed: controller.toggleObscurePassword,
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
 
-                      // Login Button
+                      // Confirm Password
+                      _buildTextField(
+                        hintText: 'Confirm Password',
+                        icon: Icons.lock_outline,
+                        obscureText: state.obscureConfirm,
+                        onChanged: controller.updatePasswordConfirm,
+                        errorText: state.fieldErrors?['password_confirm'],
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            state.obscureConfirm
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: Colors.black54,
+                          ),
+                          onPressed: controller.toggleObscureConfirm,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+
+                      // Register button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
                           onPressed: state.isLoading
                               ? null
-                              : () => controller.login(),
+                              : () async {
+                                  final ok = await controller.register();
+                                  if (!ok && context.mounted) {
+                                    // field errors already shown inline
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
@@ -148,7 +166,7 @@ class LoginScreen extends ConsumerWidget {
                                   ),
                                 )
                               : const Text(
-                                  'Login',
+                                  'Create Account',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -156,32 +174,20 @@ class LoginScreen extends ConsumerWidget {
                                 ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
-                      // Forgot Password
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-
-                      // Sign Up link
+                      // Already have account
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            "Don't have an account? ",
+                            'Already have an account? ',
                             style: TextStyle(color: Colors.black54),
                           ),
                           GestureDetector(
-                            onTap: () => context.go(AppRoutes.register),
+                            onTap: () => context.go(AppRoutes.login),
                             child: const Text(
-                              'Sign Up',
+                              'Sign In',
                               style: TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
@@ -193,8 +199,8 @@ class LoginScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 40),
 
+                const SizedBox(height: 40),
                 const Text(
                   '© 2024 QuickSlot Sports Booking. All rights reserved.',
                   style: TextStyle(color: Colors.black45, fontSize: 12),
@@ -239,6 +245,7 @@ class LoginScreen extends ConsumerWidget {
     bool obscureText = false,
     Widget? suffixIcon,
     TextInputType? keyboardType,
+    String? errorText,
   }) {
     return TextFormField(
       obscureText: obscureText,
@@ -249,6 +256,7 @@ class LoginScreen extends ConsumerWidget {
         hintStyle: const TextStyle(color: Colors.black54),
         prefixIcon: Icon(icon, color: Colors.black54),
         suffixIcon: suffixIcon,
+        errorText: errorText,
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -261,6 +269,14 @@ class LoginScreen extends ConsumerWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
         ),
       ),
     );

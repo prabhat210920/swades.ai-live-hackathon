@@ -63,6 +63,11 @@ class AuthController extends Notifier<AuthState> {
     );
   }
 
+  /// Called by the splash screen if auth check takes too long.
+  void forceNotLoading() {
+    state = state.copyWith(isLoggedIn: false, isLoading: false);
+  }
+
   Future<void> logout() async {
     await _repo.logout();
     state = const AuthState(isLoggedIn: false, isLoading: false);
