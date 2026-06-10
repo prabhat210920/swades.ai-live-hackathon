@@ -101,7 +101,24 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("   Venues and slots cleared."))
 
         # ------------------------------------------------------------------
-        # 1. Create test user
+        # 1. Create default superuser (admin)
+        # ------------------------------------------------------------------
+        admin_phone = "+910000000000"
+        admin_password = "admin@1234"
+
+        if not CustomUser.objects.filter(phone_number=admin_phone).exists():
+            CustomUser.objects.create_superuser(
+                phone_number=admin_phone,
+                password=admin_password,
+            )
+            self.stdout.write(self.style.SUCCESS(
+                f"✅ Superuser created  → phone: {admin_phone}  password: {admin_password}"
+            ))
+        else:
+            self.stdout.write(f"ℹ️  Superuser already exists: {admin_phone}")
+
+        # ------------------------------------------------------------------
+        # 2. Create test user
         # ------------------------------------------------------------------
         test_phone = "+919999999999"
         test_password = "test@1234"
@@ -117,7 +134,7 @@ class Command(BaseCommand):
             self.stdout.write(f"ℹ️  Test user already exists: {test_phone}")
 
         # ------------------------------------------------------------------
-        # 2. Create venues
+        # 3. Create venues
         # ------------------------------------------------------------------
         venues_created = 0
         venue_objects = []
@@ -140,7 +157,7 @@ class Command(BaseCommand):
         ))
 
         # ------------------------------------------------------------------
-        # 3. Create slots — for each venue, for next N days
+        # 4. Create slots — for each venue, for next N days
         # ------------------------------------------------------------------
         today = timezone.now().date()
         slots_created = 0
@@ -179,7 +196,11 @@ class Command(BaseCommand):
         self.stdout.write(f"   Slots  : {Slot.objects.count()}")
         self.stdout.write(f"   Users  : {CustomUser.objects.count()}")
         self.stdout.write("")
-        self.stdout.write("📱 Test login credentials:")
+        self.stdout.write("🔑 Superuser credentials:")
+        self.stdout.write(f"   phone_number : {admin_phone}")
+        self.stdout.write(f"   password     : {admin_password}")
+        self.stdout.write("")
+        self.stdout.write("📱 Test user credentials:")
         self.stdout.write(f"   phone_number : {test_phone}")
         self.stdout.write(f"   password     : {test_password}")
         self.stdout.write("=" * 50)
