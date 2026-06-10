@@ -8,10 +8,10 @@ import '../../view/auth/login_page.dart';
 import '../../view/auth/register_screen.dart';
 import '../../view/booking_success_screen.dart';
 import '../../view/home/home_screen.dart';
+import '../../view/home/venue_detail_screen.dart';
 import '../../view/my_bookings_screen.dart';
 import '../../view/profile_screen.dart';
 import '../../view/splash_screen.dart';
-import '../../view/venue_detail_screen.dart';
 
 // Route paths
 class AppRoutes {

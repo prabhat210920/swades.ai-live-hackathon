@@ -39,24 +39,19 @@ class VenueCard extends StatelessWidget {
                   const BorderRadius.vertical(top: Radius.circular(16)),
               child: Stack(
                 children: [
-                  Container(
+                  Image.network(
+                    venue.imageUrl,
+                    fit: BoxFit.cover,
                     height: 160,
                     width: double.infinity,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.primary.withOpacity(0.8),
-                          AppColors.primaryDark,
-                        ],
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.sports_soccer_rounded,
-                      size: 60,
-                      color: Colors.white30,
-                    ),
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/images/venue.png',
+                        fit: BoxFit.cover,
+                        height: 160,
+                        width: double.infinity,
+                      );
+                    },
                   ),
                   Positioned(
                     top: 12,
@@ -166,16 +161,45 @@ class VenueCard extends StatelessWidget {
                   ],
                   const SizedBox(height: 12),
                   const Divider(height: 1, color: AppColors.border),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Check availability',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Price',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '₹${venue.pricePerHour.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Text(
+                                ' / hr',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                       ElevatedButton(
                         onPressed: onTap,
@@ -184,7 +208,7 @@ class VenueCard extends StatelessWidget {
                           foregroundColor: Colors.white,
                           minimumSize: Size.zero,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
+                              horizontal: 20, vertical: 10),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),

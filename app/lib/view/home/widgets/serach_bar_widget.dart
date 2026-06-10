@@ -1,12 +1,14 @@
+import 'package:QuickSlot/controller/home_state_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 
-class SearchBarWidget extends StatelessWidget {
+class SearchBarWidget extends ConsumerWidget {
   const SearchBarWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       height: 50,
       decoration: BoxDecoration(
@@ -27,7 +29,10 @@ class SearchBarWidget extends StatelessWidget {
                 border: InputBorder.none,
                 isDense: true,
               ),
-              onChanged: (_) {},
+              onChanged: (value) {
+                // Update the search query state on every keystroke
+                ref.read(venueSearchQueryProvider.notifier).state = value;
+              },
             ),
           ),
           Container(

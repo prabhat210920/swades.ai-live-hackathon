@@ -1,3 +1,4 @@
+import 'package:QuickSlot/controller/home_state_controller.dart';
 import 'package:QuickSlot/controller/venue_controller.dart';
 import 'package:QuickSlot/core/router/app_router.dart';
 import 'package:QuickSlot/core/theme/app_theme.dart';
@@ -18,6 +19,23 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final venueState = ref.watch(venueListControllerProvider);
+    final searchQuery = ref.watch(venueSearchQueryProvider).toLowerCase();
+    final selectedCategory = ref.watch(venueCategoryProvider);
+
+    // Filter the venues locally based on search query and category
+    final filteredVenues = venueState.venues.where((venue) {
+      // 1. Text Search Check
+      final matchesSearch = venue.name.toLowerCase().contains(searchQuery) ||
+          venue.address.toLowerCase().contains(searchQuery) ||
+          venue.city.toLowerCase().contains(searchQuery);
+
+      // 2. Category Check
+      final matchesCategory = selectedCategory == 'All' ||
+          venue.sports.any(
+              (sport) => sport.toLowerCase() == selectedCategory.toLowerCase());
+
+      return matchesSearch && matchesCategory;
+    }).toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -31,9 +49,14 @@ class HomeScreen extends ConsumerWidget {
             Expanded(
               child: RefreshIndicator(
                 color: AppColors.primary,
-                onRefresh: () => ref
-                    .read(venueListControllerProvider.notifier)
-                    .fetchVenues(),
+                onRefresh: () async {
+                  // Reset filters on pull-to-refresh
+                  ref.read(venueSearchQueryProvider.notifier).state = '';
+                  ref.read(venueCategoryProvider.notifier).state = 'All';
+                  await ref
+                      .read(venueListControllerProvider.notifier)
+                      .fetchVenues();
+                },
                 child: CustomScrollView(
                   slivers: [
                     // Greeting Section
@@ -92,7 +115,7 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
 
-                    // Venue List Implementation based on state
+                    // Venue List Implementation based on state and filters
                     if (venueState.isLoading)
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -116,20 +139,39 @@ class HomeScreen extends ConsumerWidget {
                       const SliverFillRemaining(
                         child: EmptyStateWidget(),
                       )
+                    else if (filteredVenues.isEmpty)
+                      SliverFillRemaining(
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.search_off_rounded,
+                                  size: 60, color: AppColors.textHint),
+                              SizedBox(height: 16),
+                              Text(
+                                'No matches found',
+                                style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                     else
                       SliverPadding(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                         sliver: SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) => VenueCard(
-                              venue: venueState.venues[index],
-                              onTap: () => context.push(
-                                AppRoutes.venueDetailPath(
-                                  venueState.venues[index].id,
-                                ),
-                              ),
+                              venue: filteredVenues[index],
+                              onTap: () {
+                                context.push(AppRoutes.venueDetailPath(
+                                    filteredVenues[index].id));
+                              },
                             ),
-                            childCount: venueState.venues.length,
+                            childCount: filteredVenues.length,
                           ),
                         ),
                       ),

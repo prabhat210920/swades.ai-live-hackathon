@@ -11,7 +11,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authControllerProvider);
-    final phone = authState.userPhone ?? 'Unknown';
+    final phone = authState.userPhone ?? 'Unknown Player';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -27,41 +27,35 @@ class ProfileScreen extends ConsumerWidget {
         ),
         centerTitle: false,
         automaticallyImplyLeading: false,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ─── Header ──────────────────────────────────────────────────
+            // ─── Minimal Header ──────────────────────────────────────────
             Container(
               width: double.infinity,
               color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+              padding: const EdgeInsets.only(bottom: 32, top: 16),
               child: Column(
                 children: [
-                  // Avatar
                   Container(
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.primaryContainer,
-                      border: Border.all(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
+                      border: Border.all(color: AppColors.primary, width: 2),
                     ),
-                    child: Center(
-                      child: Text(
-                        _initials(phone),
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.person_rounded,
+                        size: 40,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   Text(
                     phone,
                     style: const TextStyle(
@@ -78,24 +72,12 @@ class ProfileScreen extends ConsumerWidget {
                       fontSize: 13,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // Stats row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _StatCard(label: 'Bookings', value: '—'),
-                      _StatDivider(),
-                      _StatCard(label: 'Venues', value: '—'),
-                      _StatDivider(),
-                      _StatCard(label: 'Hours', value: '—'),
-                    ],
-                  ),
                 ],
               ),
             ),
             const SizedBox(height: 12),
 
-            // ─── Menu Items ───────────────────────────────────────────────
+            // ─── Essential Menu Items ────────────────────────────────────
             Container(
               color: Colors.white,
               child: Column(
@@ -107,8 +89,8 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   _Divider(),
                   _MenuItem(
-                    icon: Icons.notifications_none_rounded,
-                    label: 'Notifications',
+                    icon: Icons.history_rounded,
+                    label: 'My Bookings',
                     onTap: () {},
                   ),
                   _Divider(),
@@ -117,18 +99,12 @@ class ProfileScreen extends ConsumerWidget {
                     label: 'Help & Support',
                     onTap: () {},
                   ),
-                  _Divider(),
-                  _MenuItem(
-                    icon: Icons.info_outline_rounded,
-                    label: 'About QuickSlot',
-                    onTap: () {},
-                  ),
                 ],
               ),
             ),
             const SizedBox(height: 12),
 
-            // ─── Logout ───────────────────────────────────────────────────
+            // ─── Logout ──────────────────────────────────────────────────
             Container(
               color: Colors.white,
               child: _MenuItem(
@@ -140,12 +116,13 @@ class ProfileScreen extends ConsumerWidget {
                 onTap: () => _confirmLogout(context, ref),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
+
             const Text(
-              '© 2024 QuickSlot Sports Booking',
+              '© 2026 QuickSlot Sports Booking',
               style: TextStyle(color: AppColors.textHint, fontSize: 12),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -181,60 +158,11 @@ class ProfileScreen extends ConsumerWidget {
 
     if (confirmed == true) {
       await ref.read(authControllerProvider.notifier).logout();
-      // GoRouter redirect will handle navigation to login
     }
-  }
-
-  String _initials(String phone) {
-    // Last 2 digits of phone as "initials"
-    if (phone.length >= 2) return phone.substring(phone.length - 2);
-    return phone;
   }
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 30,
-      width: 1,
-      color: AppColors.border,
-    );
-  }
-}
 
 class _MenuItem extends StatelessWidget {
   const _MenuItem({
