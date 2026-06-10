@@ -24,8 +24,12 @@ class CustomUserAdmin(BaseUserAdmin):
 
 @admin.register(Venue)
 class VenueAdmin(admin.ModelAdmin):
-    list_display = ["name", "city", "created_at"]
+    list_display = ["name", "city", "sports_display", "created_at"]
     search_fields = ["name", "city"]
+
+    @admin.display(description="Sports")
+    def sports_display(self, obj):
+        return ", ".join(obj.sports) if obj.sports else "—"
 
 
 @admin.register(Slot)

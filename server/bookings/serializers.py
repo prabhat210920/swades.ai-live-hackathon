@@ -96,7 +96,17 @@ class RegisterSerializer(serializers.Serializer):
 class VenueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Venue
-        fields = ["id", "name", "address", "city", "description", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "name",
+            "address",
+            "city",
+            "description",
+            "image_url",
+            "sports",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
 

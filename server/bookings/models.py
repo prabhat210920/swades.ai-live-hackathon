@@ -57,6 +57,14 @@ class Venue(models.Model):
     address = models.TextField()
     city = models.CharField(max_length=100)
     description = models.TextField(blank=True, default="")
+    # URL pointing to a representative photo of the venue (e.g. hosted on Cloudinary, S3, etc.)
+    image_url = models.URLField(blank=True, default="", help_text="Public URL of the venue image.")
+    # List of sports offered, e.g. ["Badminton", "Squash", "Table Tennis"]
+    sports = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of sports available at this venue, e.g. ['Badminton', 'Squash'].",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -24,30 +24,40 @@ VENUES = [
         "address": "80 Feet Road, Koramangala 4th Block",
         "city": "Bengaluru",
         "description": "Premium indoor sports complex with 6 badminton courts and 2 squash courts.",
+        "image_url": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800",
+        "sports": ["Badminton", "Squash", "Table Tennis"],
     },
     {
         "name": "Indiranagar Cricket Ground",
         "address": "100 Feet Road, Indiranagar",
         "city": "Bengaluru",
         "description": "Open-air cricket ground with a turf pitch and practice nets.",
+        "image_url": "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800",
+        "sports": ["Cricket"],
     },
     {
         "name": "HSR Futsal Club",
         "address": "Sector 7, HSR Layout",
         "city": "Bengaluru",
         "description": "5-a-side and 7-a-side football turf, floodlit for night matches.",
+        "image_url": "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800",
+        "sports": ["Football", "Futsal"],
     },
     {
         "name": "Powai Aquatic Centre",
         "address": "Hiranandani Gardens, Powai",
         "city": "Mumbai",
         "description": "Olympic-size swimming pool with separate learner's pool and spa.",
+        "image_url": "https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?w=800",
+        "sports": ["Swimming"],
     },
     {
         "name": "Bandra Tennis Academy",
         "address": "Hill Road, Bandra West",
         "city": "Mumbai",
         "description": "4 clay courts and 2 hard courts with on-site coaching available.",
+        "image_url": "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800",
+        "sports": ["Tennis"],
     },
 ]
 
@@ -146,6 +156,8 @@ class Command(BaseCommand):
                     "address": v["address"],
                     "city": v["city"],
                     "description": v["description"],
+                    "image_url": v.get("image_url", ""),
+                    "sports": v.get("sports", []),
                 },
             )
             venue_objects.append(venue)
