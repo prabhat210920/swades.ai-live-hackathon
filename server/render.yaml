@@ -25,25 +25,17 @@ services:
         value: "False"
 
       - key: ALLOWED_HOSTS
-        # Render sets RENDER_EXTERNAL_HOSTNAME automatically; add your custom domain too
         value: ".onrender.com,localhost,127.0.0.1"
 
       - key: DATABASE_URL
-        fromDatabase:
-          name: quickslot-db         # must match the database name below
-          property: connectionString
+        # Set this manually in the Render dashboard with your external PostgreSQL URL.
+        # Format: postgresql://user:password@host/dbname
+        sync: false
 
       - key: PYTHON_VERSION
         value: "3.12.0"
 
     healthCheckPath: /api/schema/    # Render hits this to confirm the service is up
 
-  # ---------------------------------------------------------------------------
-  # Managed PostgreSQL database
-  # ---------------------------------------------------------------------------
-databases:
-  - name: quickslot-db
-    databaseName: quickslot
-    user: quickslot_user
-    region: singapore               # keep same region as the web service
-    plan: free                      # free tier: 1 GB, expires after 90 days
+# NOTE: No managed database block — using an external PostgreSQL instance.
+# Set DATABASE_URL manually in your Render service's Environment Variables.
