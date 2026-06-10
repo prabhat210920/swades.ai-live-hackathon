@@ -116,6 +116,28 @@ Use these to log into the Admin Panel or test the API via Swagger:
 
 ---
 
+## 🧠 Development & UI Workflow: Overcoming Constraints
+
+Building a full-stack, production-grade application within a strict 3-hour window is a massive challenge—especially without access to paid, unlimited LLM services. Dealing with strict rate limits and API lockouts in the middle of a hackathon was incredibly frustrating. To keep the momentum going and beat the clock, I had to continuously juggle multiple Google accounts to bypass credit limits. 
+
+Here is the exact battle-tested workflow I used to conceptualize, design, and deploy **QuickSlot** under intense time constraints:
+
+### 1. Strategic Planning & Architecture
+* **Documentation parsing:** I first converted the hackathon problem statement and requirements into a clean Markdown document.
+* **Initial Brainstorming:** I fed this document into ChatGPT to generate a baseline work plan.
+* **Architectural Refinement:** I didn't just accept the AI's generic output. I heavily modified the plan to fit my specific technical strengths: **Flutter Riverpod** for state management, highly decoupled atomic widget architecture, and a Django REST Framework backend.
+
+### 2. Parallel Execution (Backend & UI Design)
+* **Backend Construction:** With the customized plan in hand, I switched to **Antigravity** to rapidly scaffold and write the backend logic, ensuring concurrency safety and proper JWT authentication.
+* **UI Generation:** Simultaneously, I drafted a strict UI/UX plan and fed it into **Stich** to generate the initial visual designs and layout structures for a premium, minimalist aesthetic.
+
+### 3. Deployment Hurdles
+* **The Render Struggle:** As is tradition in hackathons, deploying the backend to Render presented unexpected configuration struggles. However, I managed to debug the WSGI/database configurations and successfully pushed the Django API live to the cloud.
+
+### 4. Frontend Execution with Gemini
+* **Context Bridging:** Once the backend was live and the UI design was ready, I asked the LLM to generate a comprehensive, single-document summary of the entire backend (endpoints, JSON structures, auth flow).
+* **Rapid UI Development:** I fed this unified backend context document into **Gemini**. This allowed Gemini to act as a highly context-aware pair programmer, helping me write the complex Flutter frontend, connect Riverpod providers to real endpoints, and perfectly replicate the Stich UI designs without hallucinating dummy data.
+
 ## 💻 Local Development Setup (Backend)
 
 Ensure you have Python 3.10+ installed.
